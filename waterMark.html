@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加水印</title>
+</head>
+<body>
+    <input type="file" id='file'>
+    <img src="" alt="" id="img1">
+</body>
+<script>  
+    function __picWM({
+        flag =  '',         
+        url = '',         
+        textAlign = 'center',         
+        textBaseline = 'middle',         
+        font = "18px Microsoft Yahei",         
+        fillStyle = 'rgba(184, 184, 184, 0.8)',         
+        content = '请勿外传',  
+        rotate = 15,       
+        cb = null,         
+        textX = 100,         
+        textY = 20       
+        } = {}) {         
+            const img = new Image();         
+            img.src = url;         
+            img.crossOrigin = 'anonymous';         
+            img.onload = function() {           
+                const canvas = document.createElement('canvas');          
+                canvas.width = img.width;           
+                canvas.height = img.height;           
+                const ctx = canvas.getContext('2d', 'repeat');             
+                ctx.drawImage(img, 0, 0);           
+                ctx.textAlign = textAlign;           
+                ctx.textBaseline = textBaseline;           
+                ctx.font = font;           
+                ctx.fillStyle = fillStyle;
+                if(flag===1){
+                    ctx.fillText(content, img.width - textX, img.height - textY);             
+                }else{
+                    ctx.rotate(Math.PI / 180 * rotate);    
+                    for(let i = (document.body.offsetHeight*0.5)*-10; i<800; i+=170) {
+                        for(let j = 0; j<document.body.offsetHeight*50; j+=130) {
+                            ctx.fillText(content, i, j)
+                        }
+                    }
+                }
+                const base64Url = canvas.toDataURL();           
+                cb && cb(base64Url);         
+            }       
+    }           
+            if (typeof module != 'undefined' && module.exports) {           
+                module.exports = __picWM;       
+            } else if (typeof define == 'function' && define.amd) {          
+                define(function () {           
+                    return __picWM;         
+                });       
+            } else {         
+                window.__picWM = __picWM;       
+            }   
+
+
+        var imgUrlFile
+        const fileNode = document.getElementById('file')  
+        fileNode.addEventListener('change',(e)=>{
+            reader = new FileReader();
+            const file = e.target.files[0]
+            imgUrlFile = URL.createObjectURL(file)
+            reader.readAsDataURL(file)
+            __picWM({        
+                url: imgUrlFile,        
+                content: '云水印',
+                flag: 2,
+                textY: 200,        
+                cb: (base64Url) => {          
+                    document.getElementById('img1').src = base64Url         
+                },       
+            });
+        })     
+</script>
+</html>
